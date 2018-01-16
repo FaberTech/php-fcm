@@ -29,6 +29,8 @@ class Message implements \JsonSerializable
     private $timeToLive;
     private $delayWhileIdle;
 
+    private $platforms = array();
+
     /**
      * Represents the app's "Send-to-Sync" message.
      *
@@ -81,6 +83,26 @@ class Message implements \JsonSerializable
         $this->collapseKey = $collapseKey;
         return $this;
     }
+
+
+
+    /**
+     * sending platform specific information
+     * @see https://firebase.google.com/docs/cloud-messaging/concept-options#setting-the-priority-of-a-message
+     *
+     * @param string $platformName - name of the platform
+     *
+     * @param string $message - the platform specific message
+     *
+     * @return \paragraph1\phpFCM\Message
+     */
+    public function setPlatformMessage($platformName, $message)
+    {
+        $this->platforms[$platformName] = $message;
+        return $this;
+    }
+
+
 
     /**
      * normal or high, use class constants as value
@@ -168,6 +190,10 @@ class Message implements \JsonSerializable
         }
         if ($this->contentAvailableFlag === TRUE) {
             $jsonData['content_available'] = TRUE;
+        }
+
+        foreach ($this->platforms as $platformName => $message) {
+            $jsonData[$platformName] = $message->jsonSerialize();
         }
 
         return $jsonData;
