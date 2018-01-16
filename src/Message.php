@@ -161,15 +161,19 @@ class Message implements \JsonSerializable
         return $this;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize($includeReceipts=true)
     {
         $jsonData = array();
 
-        if (empty($this->recipients)) {
-            throw new \UnexpectedValueException('message must have at least one recipient');
-        }
+        if($includeReceipts==true)
+        {
+            if (empty($this->recipients)) {
+                throw new \UnexpectedValueException('message must have at least one recipient');
+            }
 
-        $this->createTo($jsonData);
+            $this->createTo($jsonData);  
+        }
+        
         if ($this->collapseKey) {
             $jsonData['collapse_key'] = $this->collapseKey;
         }
@@ -193,7 +197,7 @@ class Message implements \JsonSerializable
         }
 
         foreach ($this->platforms as $platformName => $message) {
-            $jsonData[$platformName] = $message->jsonSerialize();
+            $jsonData[$platformName] = $message->jsonSerialize(false);
         }
 
         return $jsonData;
